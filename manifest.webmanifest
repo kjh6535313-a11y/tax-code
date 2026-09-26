@@ -1,0 +1,13 @@
+{
+  "name": "세무 투두",
+  "short_name": "세무투두",
+  "description": "세무 업무용 일일 할일·월별 세무일정·매일 알람",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#1f3a8a",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

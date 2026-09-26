@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>세무 투두</title>
+  <meta name="theme-color" content="#1f3a8a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="28" height="28">
+      <span>세무 투두</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="today" role="tab">오늘 할일</button>
+      <button class="tab" data-view="month" role="tab">월별 세무일정</button>
+      <button class="tab" data-view="settings" role="tab">알람·설정</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- 오늘 할일 -->
+    <section id="view-today" class="view active">
+      <div class="date-nav">
+        <button class="icon-btn" id="day-prev" aria-label="이전 날">◀</button>
+        <input type="date" id="day-picker" aria-label="날짜 선택">
+        <span id="day-label" class="day-label"></span>
+        <button class="icon-btn" id="day-next" aria-label="다음 날">▶</button>
+        <button class="btn ghost" id="day-today">오늘</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="card briefing">
+          <h2>오늘의 브리핑</h2>
+          <div class="progress-wrap">
+            <div class="progress"><div id="progress-bar"></div></div>
+            <span id="progress-text"></span>
+          </div>
+          <h3>이 날 마감</h3>
+          <ul id="due-today" class="event-list compact"></ul>
+          <h3>다가오는 마감 <small>(14일)</small></h3>
+          <ul id="due-upcoming" class="event-list compact"></ul>
+        </div>
+
+        <div class="card">
+          <form id="task-form" class="task-form" autocomplete="off">
+            <div class="row">
+              <input id="f-title" placeholder="할 일 입력 (예: ㈜한빛 부가세 자료 요청)" required>
+              <button class="btn primary" type="submit">추가</button>
+            </div>
+            <div class="row wrap">
+              <select id="f-cat" aria-label="세목"></select>
+              <input id="f-client" placeholder="거래처" list="client-list" aria-label="거래처">
+              <input id="f-time" type="time" aria-label="알림 시간">
+              <select id="f-priority" aria-label="중요도">
+                <option value="normal">보통</option>
+                <option value="high">중요</option>
+                <option value="low">낮음</option>
+              </select>
+              <select id="f-repeat" aria-label="반복">
+                <option value="none">반복 없음</option>
+                <option value="daily">매일</option>
+                <option value="weekdays">평일</option>
+                <option value="weekly">매주</option>
+                <option value="monthly">매월</option>
+              </select>
+            </div>
+            <datalist id="client-list"></datalist>
+          </form>
+
+          <div id="overdue-box" class="overdue" hidden>
+            <span id="overdue-text"></span>
+            <button class="btn small" id="overdue-pull">오늘로 가져오기</button>
+          </div>
+
+          <div class="filters">
+            <div class="seg" id="status-filter">
+              <button data-v="all" class="on">전체</button>
+              <button data-v="open">미완료</button>
+              <button data-v="done">완료</button>
+            </div>
+            <select id="cat-filter" aria-label="세목 필터"></select>
+          </div>
+
+          <ul id="task-list" class="task-list"></ul>
+          <p id="task-empty" class="empty" hidden>할 일이 없습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 월별 세무일정 -->
+    <section id="view-month" class="view">
+      <div class="date-nav">
+        <button class="icon-btn" id="month-prev" aria-label="이전 달">◀</button>
+        <h2 id="month-label" class="month-label"></h2>
+        <button class="icon-btn" id="month-next" aria-label="다음 달">▶</button>
+        <button class="btn ghost" id="month-today">이번 달</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="ics-export" title="휴대폰·구글·아웃룩 캘린더로 가져오기">캘린더(.ics) 내보내기</button>
+      </div>
+
+      <div class="grid-month">
+        <div class="card cal-card">
+          <div class="cal-head">
+            <span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span>
+          </div>
+          <div id="calendar" class="calendar"></div>
+        </div>
+
+        <div class="card">
+          <h2 id="sel-label"></h2>
+          <ul id="sel-events" class="event-list"></ul>
+          <p id="sel-empty" class="empty" hidden>일정이 없습니다.</p>
+          <div class="row">
+            <button class="btn small" id="sel-goto">이 날 할일 보기</button>
+          </div>
+          <form id="event-form" class="event-form" autocomplete="off">
+            <h3>일정 추가</h3>
+            <input id="e-title" placeholder="예: ㈜한빛 법인세 신고 (3월 결산)" required>
+            <div class="row wrap">
+              <select id="e-cat" aria-label="세목"></select>
+              <input id="e-memo" placeholder="메모">
+              <button class="btn primary" type="submit">추가</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>이달의 세무일정</h2>
+        <ul id="month-events" class="event-list"></ul>
+      </div>
+    </section>
+
+    <!-- 설정 -->
+    <section id="view-settings" class="view">
+      <div class="grid-2">
+        <div class="card">
+          <h2>매일 알람</h2>
+          <label class="switch-row"><input type="checkbox" id="s-daily"> 매일 브리핑 알람</label>
+          <label class="field">알람 시간 <input type="time" id="s-daily-time"></label>
+          <fieldset class="field">
+            <legend>마감 사전 알림 (브리핑에 포함)</legend>
+            <label><input type="checkbox" class="s-remind" value="7"> D-7</label>
+            <label><input type="checkbox" class="s-remind" value="3"> D-3</label>
+            <label><input type="checkbox" class="s-remind" value="1"> D-1</label>
+            <label><input type="checkbox" class="s-remind" value="0"> 당일</label>
+          </fieldset>
+          <label class="switch-row"><input type="checkbox" id="s-task"> 할일 시간 알림 (시간을 지정한 할일)</label>
+          <label class="switch-row"><input type="checkbox" id="s-sound"> 알림 소리</label>
+          <div class="row wrap">
+            <button class="btn primary" id="s-permission">브라우저 알림 허용</button>
+            <button class="btn" id="s-test">테스트 알림</button>
+          </div>
+          <p id="s-perm-status" class="hint"></p>
+          <p class="hint">
+            알람은 이 페이지(또는 홈 화면에 설치한 앱)가 열려 있을 때 울립니다. 알람 시간에 열려 있지 않았다면 그날 처음 열 때 브리핑을 보여줍니다.
+            페이지를 닫아도 알람을 받으려면 <b>월별 세무일정 → 캘린더(.ics) 내보내기</b>로 휴대폰 캘린더에 등록하세요 (D-3·당일 오전 9시 알림 포함).
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>기본 세무일정 표시</h2>
+          <p class="hint">업무와 관계없는 일정은 끄세요. (예: 반기납부 거래처가 없으면 반기납부 끄기)</p>
+          <ul id="rule-list" class="rule-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>반복 할일</h2>
+          <ul id="recurring-list" class="rule-list"></ul>
+          <p id="recurring-empty" class="empty">반복 할일이 없습니다.</p>
+        </div>
+
+        <div class="card">
+          <h2>공휴일 추가</h2>
+          <p class="hint">휴일이면 신고기한이 다음 영업일로 연장됩니다. 2026~2027년 공휴일은 기본 포함되어 있고, 임시공휴일 등은 여기서 추가하세요.</p>
+          <form id="holiday-form" class="row wrap">
+            <input type="date" id="h-date" required aria-label="날짜">
+            <input id="h-name" placeholder="이름 (예: 임시공휴일)" required>
+            <button class="btn" type="submit">추가</button>
+          </form>
+          <ul id="holiday-list" class="rule-list"></ul>
+
+          <h2>데이터</h2>
+          <p class="hint">데이터는 이 브라우저에만 저장됩니다. 주기적으로 백업하세요.</p>
+          <div class="row wrap">
+            <button class="btn" id="d-export">백업 (JSON)</button>
+            <label class="btn">복원<input type="file" id="d-import" accept="application/json" hidden></label>
+            <button class="btn danger" id="d-reset">전체 초기화</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="edit-dialog">
+    <form method="dialog" id="edit-form" class="edit-form">
+      <h2>할일 수정</h2>
+      <label class="field">할 일 <input id="x-title" required></label>
+      <div class="row wrap">
+        <label class="field">날짜 <input type="date" id="x-date" required></label>
+        <label class="field">시간 <input type="time" id="x-time"></label>
+      </div>
+      <div class="row wrap">
+        <label class="field">세목 <select id="x-cat"></select></label>
+        <label class="field">중요도
+          <select id="x-priority">
+            <option value="normal">보통</option>
+            <option value="high">중요</option>
+            <option value="low">낮음</option>
+          </select>
+        </label>
+      </div>
+      <label class="field">거래처 <input id="x-client" list="client-list"></label>
+      <label class="field">메모 <textarea id="x-memo" rows="3"></textarea></label>
+      <div class="row end">
+        <button class="btn" value="cancel" formnovalidate>취소</button>
+        <button class="btn primary" value="save">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/tax-data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/alarm.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
